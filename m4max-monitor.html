@@ -1,0 +1,247 @@
+<!-- m4max-monitor.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>M4 Max Training Monitor</title>
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      margin: 0; padding: 20px;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: #0b0d10; color: #e8eef5;
+    }
+    h1 { font-size: 18px; margin: 0 0 12px; font-weight: 650; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .card {
+      background: #121722; border: 1px solid #243047; border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    .card h2 { margin: 0 0 10px; font-size: 13px; opacity: .9; font-weight: 650; letter-spacing: .02em; }
+    .kpi {
+      display: grid; grid-template-columns: 1fr auto; gap: 6px 10px;
+      align-items: baseline;
+      padding: 10px 0; border-top: 1px solid rgba(255,255,255,.06);
+    }
+    .kpi:first-of-type { border-top: 0; }
+    .label { font-size: 12px; opacity: .8; }
+    .value { font-size: 15px; font-weight: 700; }
+    .small { font-size: 12px; opacity: .75; }
+    .muted { opacity: .7; }
+    .bar {
+      height: 10px; background: rgba(255,255,255,.08);
+      border-radius: 999px; overflow: hidden; border: 1px solid rgba(255,255,255,.08);
+    }
+    .bar > div { height: 100%; width: 0%; background: rgba(120, 180, 255, .85); }
+    .controls { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    button, input {
+      background: #0f1420; color: #e8eef5;
+      border: 1px solid #243047; border-radius: 10px;
+      padding: 10px 12px; font-weight: 650;
+    }
+    button { cursor: pointer; }
+    button:hover { border-color: #35507a; }
+    .pill {
+      display: inline-flex; gap: 8px; align-items: center;
+      padding: 6px 10px; border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.06);
+      font-size: 12px; font-weight: 650;
+    }
+    .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .warn { color: #ffd08a; }
+    .ok { color: #93ffb3; }
+    .bad { color: #ff8aa0; }
+    .footer { margin-top: 14px; font-size: 12px; opacity: .75; }
+  </style>
+</head>
+<body>
+<h1>M4 Max Training Monitor</h1>
+
+<div class="row">
+  <div class="card">
+    <h2>Live Metrics (polls a local JSON endpoint)</h2>
+    <div class="controls">
+      <div class="grid3">
+        <input id="endpoint" value="http://localhost:8787/metrics" />
+        <input id="intervalMs" type="number" value="1000" min="200" step="100" />
+        <button id="toggle">Start</button>
+      </div>
+      <div class="small muted">
+        Expecting JSON like:
+        <span class="pill">{ gpu: {...}, memory: {...}, thermal: {...}, perf: {...} }</span>
+      </div>
+    </div>
+
+    <div style="margin-top:12px">
+      <div id="status" class="pill">Status: <span class="muted">stopped</span></div>
+    </div>
+
+    <div style="margin-top:12px">
+      <div class="kpi">
+        <div class="label">GPU Active Residency</div><div class="value" id="gpuActive">—</div>
+        <div class="bar" style="grid-column:1 / -1"><div id="gpuActiveBar"></div></div>
+      </div>
+      <div class="kpi">
+        <div class="label">GPU Frequency</div><div class="value" id="gpuFreq">—</div>
+      </div>
+      <div class="kpi">
+        <div class="label">GPU Power</div><div class="value" id="gpuPower">—</div>
+      </div>
+      <div class="kpi">
+        <div class="label">GPU Idle Residency</div><div class="value" id="gpuIdle">—</div>
+        <div class="bar" style="grid-column:1 / -1"><div id="gpuIdleBar"></div></div>
+      </div>
+
+      <div class="kpi">
+        <div class="label">Memory Pressure</div><div class="value" id="memPressure">—</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Swap Used</div><div class="value" id="swapUsed">—</div>
+      </div>
+
+      <div class="kpi">
+        <div class="label">ms/step</div><div class="value" id="msStep">—</div>
+      </div>
+      <div class="kpi">
+        <div class="label">tokens/sec</div><div class="value" id="tps">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Thermals</h2>
+
+    <div style="margin-top:12px">
+      <div class="kpi">
+        <div class="label">Thermal Pressure</div><div class="value" id="thermPressure">—</div>
+      </div>
+      <div class="kpi">
+        <div class="label">CPU Speed Limit</div><div class="value" id="cpuLimit">—</div>
+      </div>
+      <div class="kpi">
+        <div class="label">GPU Speed Limit</div><div class="value" id="gpuLimit">—</div>
+      </div>
+      <div class="kpi">
+        <div class="label">CPU Temp</div><div class="value" id="cpuTemp">—</div>
+      </div>
+      <div class="kpi">
+        <div class="label">GPU Temp</div><div class="value" id="gpuTemp">—</div>
+      </div>
+      <div class="kpi">
+        <div class="label">SoC Temp</div><div class="value" id="socTemp">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Tip: “Full potential” in practice = <span class="pill">high sustained freq</span> + <span class="pill">high active residency</span> + <span class="pill">low swap</span> + <span class="pill">stable throughput</span>.
+</div>
+
+<script>
+  (function () {
+    const $ = (id) => document.getElementById(id);
+
+    let timer = null;
+    let lastGoodAt = null;
+
+    function setStatus(text, cls) {
+      const el = $("status");
+      el.innerHTML = `Status: <span class="${cls || "muted"}">${escapeHtml(text)}</span>`;
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function fmtPct(x) {
+      if (x === null || x === undefined || Number.isNaN(x)) return "—";
+      return `${Number(x).toFixed(1)}%`;
+    }
+    function fmtMHz(x) {
+      if (x === null || x === undefined || Number.isNaN(x)) return "—";
+      return `${Math.round(Number(x))} MHz`;
+    }
+    function fmtMW(x) {
+      if (x === null || x === undefined || Number.isNaN(x)) return "—";
+      const mw = Number(x);
+      return mw >= 1000 ? `${(mw/1000).toFixed(1)} W` : `${Math.round(mw)} mW`;
+    }
+
+    function setBar(elId, pct) {
+      const el = $(elId);
+      if (!el) return;
+      const p = Math.max(0, Math.min(100, Number(pct) || 0));
+      el.style.width = p + "%";
+    }
+
+    function applyMetrics(m) {
+      const gpu = (m && m.gpu) || {};
+      const mem = (m && m.memory) || {};
+      const perf = (m && m.perf) || {};
+      const therm = (m && m.thermal) || {};
+
+      $("gpuActive").textContent = fmtPct(gpu.active_pct);
+      setBar("gpuActiveBar", gpu.active_pct);
+
+      $("gpuFreq").textContent = fmtMHz(gpu.freq_mhz);
+      $("gpuPower").textContent = fmtMW(gpu.power_mw);
+
+      $("gpuIdle").textContent = fmtPct(gpu.idle_pct);
+      setBar("gpuIdleBar", gpu.idle_pct);
+
+      $("memPressure").textContent = mem.pressure ?? "—";
+      $("swapUsed").textContent = (mem.swap_gb != null) ? `${Number(mem.swap_gb).toFixed(2)} GB` : "—";
+
+      $("msStep").textContent = (perf.ms_per_step != null) ? `${Number(perf.ms_per_step).toFixed(2)} ms` : "—";
+      $("tps").textContent = (perf.tokens_per_s != null) ? `${Number(perf.tokens_per_s).toFixed(2)}` : "—";
+
+      $("thermPressure").textContent = therm.thermal_pressure ?? "—";
+      $("cpuLimit").textContent = (therm.cpu_speed_limit_pct != null) ? `${therm.cpu_speed_limit_pct}%` : "—";
+      $("gpuLimit").textContent = (therm.gpu_speed_limit_pct != null) ? `${therm.gpu_speed_limit_pct}%` : "—";
+
+      $("cpuTemp").textContent = (therm.cpu_temp_c != null) ? `${Number(therm.cpu_temp_c).toFixed(1)} °C` : "—";
+      $("gpuTemp").textContent = (therm.gpu_temp_c != null) ? `${Number(therm.gpu_temp_c).toFixed(1)} °C` : "—";
+      $("socTemp").textContent = (therm.soc_temp_c != null) ? `${Number(therm.soc_temp_c).toFixed(1)} °C` : "—";
+    }
+
+    async function pollOnce() {
+      const url = $("endpoint").value.trim();
+      try {
+        const r = await fetch(url, { cache: "no-store" });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const data = await r.json();
+        lastGoodAt = Date.now();
+        setStatus("running", "ok");
+        applyMetrics(data);
+      } catch (e) {
+        const since = lastGoodAt ? ((Date.now() - lastGoodAt) / 1000).toFixed(1) + "s" : "never";
+        setStatus(`error (last ok: ${since})`, "warn");
+      }
+    }
+
+    function start() {
+      stop();
+      const ms = Math.max(200, Number($("intervalMs").value) || 1000);
+      setStatus("starting…", "muted");
+      pollOnce();
+      timer = setInterval(pollOnce, ms);
+      $("toggle").textContent = "Stop";
+    }
+    function stop() {
+      if (timer) clearInterval(timer);
+      timer = null;
+      setStatus("stopped", "muted");
+      $("toggle").textContent = "Start";
+    }
+
+    $("toggle").addEventListener("click", () => {
+      if (timer) stop();
+      else start();
+    });
+  })();
+</script>
+</body>
+</html>

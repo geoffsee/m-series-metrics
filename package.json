@@ -1,12 +1,12 @@
 {
   "name": "metserve",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Training Monitor & Metrics Server",
   "license": "AGPL-3.0-only",
   "author": "github.com/geoffsee",
   "type": "module",
   "bin": {
-    "m4max-monitor": "./bin.ts"
+    "metserve": "./bin.ts"
   },
   "files": [
     "metrics-server.ts",

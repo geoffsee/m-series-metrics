@@ -1,0 +1,39 @@
+{
+  "name": "metserve",
+  "version": "0.0.1",
+  "description": "Training Monitor & Metrics Server",
+  "license": "AGPL-3.0-only",
+  "author": "github.com/geoffsee",
+  "type": "module",
+  "bin": {
+    "m4max-monitor": "./bin.ts"
+  },
+  "files": [
+    "metrics-server.ts",
+    "bin.ts",
+    "package.json",
+    "README.md",
+    "LICENSE",
+    "tsconfig.json",
+    "dashboard.html",
+    "M4Temp.swift"
+
+  ],
+  "exports": {
+    ".": {
+      "default": "./metrics-server.ts"
+    },
+    "./bin": {
+      "default": "./bin.ts"
+    }
+  },
+  "dependencies": {
+    "@types/node": "latest"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

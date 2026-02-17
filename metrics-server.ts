@@ -3,10 +3,25 @@
 /**
  * Bun metrics bridge for macOS (Apple Silicon)
  *
+ * Copyright (C) 2026 github.com/geoffsee
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
  * Endpoints:
  *   GET /metrics -> { gpu: {...}, memory: {...}, thermal: {...}, perf: {...} }
  *   GET /raw     -> raw powermetrics/memory/thermal outputs
- *   GET /        -> serves ./m4max-monitor.html if present
+ *   GET /        -> serves ./dashboard.html if present
  *
  * Run:
  *   sudo bun run bun.ts
@@ -306,11 +321,11 @@ const server = Bun.serve({
     }
 
     if (url.pathname === "/" || url.pathname === "/index.html") {
-      const file = Bun.file("./m4max-monitor.html");
+      const file = Bun.file("./dashboard.html");
       if (await file.exists()) {
         return new Response(file, { headers: { "content-type": "text/html; charset=utf-8" } });
       }
-      return text("Place m4max-monitor.html next to bun.ts\n", 404);
+      return text("Place dashboard.html next to bun.ts\n", 404);
     }
 
     return text("Not found\n", 404);

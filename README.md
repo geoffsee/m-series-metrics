@@ -1,6 +1,6 @@
 # M4 Max Training Monitor & Metrics Server
 
-A high-performance metrics bridge and real-time dashboard for macOS (specifically optimized for Apple Silicon M4 Max). It provides insights into GPU residency, power consumption, memory pressure, and die temperatures which are often difficult to access on newer hardware.
+A high-performance metrics bridge and real-time dashboard for macOS (specifically optimized for Apple Silicon M4). It provides insights into GPU residency, power consumption, memory pressure, and die temperatures which are often difficult to access on newer hardware.
 
 ## Features
 
@@ -17,7 +17,8 @@ A high-performance metrics bridge and real-time dashboard for macOS (specificall
 
 - `metrics-server.ts`: A Bun-based server that orchestrates system commands (`powermetrics`, `memory_pressure`, `pmset`) and provides the API.
 - `M4Temp.swift`: A specialized Swift tool that uses `IOHIDEventSystem` to retrieve raw temperature data from M4 PMU sensors.
-- `m4max-monitor.html`: The frontend dashboard served by the metrics server.
+- `dashboard.html`: The frontend dashboard served by the metrics server.
+- `bin.ts`: A CLI wrapper for the metrics server.
 
 ## Prerequisites
 
@@ -27,20 +28,35 @@ A high-performance metrics bridge and real-time dashboard for macOS (specificall
 
 ## Usage
 
-### 1. Run the Server
+### 1. Installation
+
+Install globally via Bun:
+```bash
+bun install -g metserve
+```
+
+Or run directly from the source:
+
+### 2. Run the Server
 
 Because `powermetrics` and HID sensor access require elevated permissions, the server must be run with `sudo`:
 
+**Using the global command (if installed):**
+```bash
+sudo metserve
+```
+
+**Using Bun directly:**
 ```bash
 sudo bun run metrics-server.ts
 ```
 
-### 2. Access the Dashboard
+### 3. Access the Dashboard
 
 Once the server is running, open your browser to:
 [http://localhost:8787/](http://localhost:8787/)
 
-### 3. API Endpoints
+### 4. API Endpoints
 
 - `GET /metrics`: Returns a structured JSON object with all current metrics.
 - `GET /raw`: Returns the raw string output from all underlying system commands for debugging.
@@ -61,7 +77,8 @@ PORT=9000 sudo bun run metrics-server.ts
 
 - **"GPU stats missing" or "Temperature sensors missing"**: Ensure you are running the server with `sudo`.
 - **M4 Max Temperatures**: On M4 Max (macOS 15+), the `smc` sampler in `powermetrics` is often unsupported. This project automatically switches to using the `M4Temp.swift` tool to provide these metrics.
-- **Dashboard not loading**: Ensure `m4max-monitor.html` is in the same directory as `metrics-server.ts`.
+- **Dashboard not loading**: Ensure `dashboard.html` is in the same directory as `metrics-server.ts`.
 
 ## License
-MIT
+
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**. See the [LICENSE](LICENSE) file for details.
